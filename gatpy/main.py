@@ -1,8 +1,9 @@
-from gatpy.csv import CSVImport
+from gatpy.csv_parser import CSVImport
 import os
 
 def main():
-    filepath = os.getcwd() + "\student_list.csv"
+    team_count = 5
+
+    filepath = os.getcwd() + "/student_list.csv"
     csv_import = CSVImport()
-    df = csv_import.import_csv(filepath)
-    student_list, course_count = csv_import.parse_df(df)
+    student_list, course_count = csv_import.import_csv(filepath)

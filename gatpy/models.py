@@ -1,16 +1,14 @@
 from enum import Enum
 
 class SPECIALISM(Enum):
-    ART = 0
+    GD_ART= 0
     ANIMATION = 1
     DESIGN =2
     WRITING = 3
     GD_PROGRAMMING = 4
     CFG_PROGRAMMING = 5
-    CS_PROGRAMMING = 6
-    SE_PROGRAMMING = 7
-    ROBOTICS = 8
     ESPORTS = 9
+    G_ART = 10
 
 class Student:
     def __init__(self, id, name, specialism, no_list):
