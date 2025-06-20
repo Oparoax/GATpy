@@ -16,7 +16,7 @@ class CSVImport:
                 if data is not None:
                     student_list.append(data)
                     course_count[data.specialism] += 1
-                    print(data.id, data.name, data.specialism, data.no_list.__str__())
+                    print(data.id, data.name, data.specialism, str(data.avoid_list))
 
         return student_list, course_count
 
@@ -34,19 +34,19 @@ class CSVImport:
 
     def what_course(self, course):
         if "Game Art" in course:
-            specialism = SPECIALISM.G_ART
+            specialism = SPECIALISM.ART
         elif "Game Development: Art" in course:
-            specialism = SPECIALISM.GD_ART
+            specialism = SPECIALISM.ART
         elif "Animation" in course:
             specialism = SPECIALISM.ANIMATION
         elif "Design" in course:
             specialism = SPECIALISM.DESIGN
         elif "Writing" in course:
-            specialism = SPECIALISM.DESIGN
+            specialism = SPECIALISM.WRITING
         elif "Programming" in course:
-            specialism = SPECIALISM.GD_PROGRAMMING
+            specialism = SPECIALISM.PROGRAMMING
         elif "Computing" in course:
-            specialism = SPECIALISM.CFG_PROGRAMMING
+            specialism = SPECIALISM.PROGRAMMING
         elif "Esports" in course:
             specialism = SPECIALISM.ESPORTS
         else:
