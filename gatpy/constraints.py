@@ -1,8 +1,9 @@
 import math
 
-import constraint as pyc
+from ortools.sat.python import cp_model
 from collections import Counter, defaultdict
 
+from ortools.sat.python.cp_model import VarArraySolutionPrinter
 
 
 class ConstraintsSolver:
@@ -29,16 +30,23 @@ class ConstraintsSolver:
 
 
     def solve(self):
-        problem = pyc.Problem()
+        problem = cp_model.CpModel()
 
         for row in self._list:
-            problem.addVariable(row.id, list(range(self.group_ids)))
+            problem.new_int_var(row.id, self.group_ids, row.name)
 
-        problem.addConstraint(self.limit_group_size)
-        problem.addConstraint(self.apply_avoid)
-        problem.addConstraint(self.limit_group_makeup)
+        problem.add(self.limit_group_size)
+        problem.add(self.apply_avoid)
+        problem.add(self.limit_group_makeup)
 
-        return problem.getSolution()
+        solver = cp_model.CpSolver()
+
+        # Solve.
+        status = solver.solve(problem)
+
+        print(status)
+
+        return status
 
     def limit_group_size(self, *row):
         c = Counter(row)
