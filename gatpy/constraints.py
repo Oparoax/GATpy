@@ -3,8 +3,6 @@ import math
 from ortools.sat.python import cp_model
 from collections import Counter, defaultdict
 
-from ortools.sat.python.cp_model import VarArraySolutionPrinter
-
 
 class ConstraintsSolver:
     def __init__(self, students, group_ids, max_group_size, courses):
@@ -28,32 +26,45 @@ class ConstraintsSolver:
 
         return course_max_value
 
-
     def solve(self):
         problem = cp_model.CpModel()
 
+        vars = {}
         for row in self._list:
-            problem.new_int_var(row.id, self.group_ids, row.name)
+            for group in range(self.group_ids):
+                vars[(row.id, group)] = problem.new_bool_var("{}_{}".format(row.id, group))
 
-        problem.add(self.limit_group_size)
-        problem.add(self.apply_avoid)
-        problem.add(self.limit_group_makeup)
+
+        # A student can only be attached to a single group
+        for row in self._list:
+            problem.add_at_most_one(vars[(row.id, group)] for group in range(self.group_ids))
+
+        # A team can only be as big as the max group size
+        for group in range(self.group_ids):
+            group_vars = []
+            for row in self._list:
+                group_vars.append(vars[(row.id, group)])
+            problem.add(sum(group_vars) <= self.max_group_size)
+
+        for group in range(self.group_ids):
+            for row in self._list:
+                student_1_var = vars[(row.id, group)]
+
+                for avoidee in row.avoid_list:
+                    student_2_var = vars[(avoidee.id, group)]
+
+                    problem.add(not (student_1_var and student_2_var))
+
+
+        #problem.add(self.limit_group_makeup)
 
         solver = cp_model.CpSolver()
 
         # Solve.
         status = solver.solve(problem)
-
         print(status)
 
         return status
-
-    def limit_group_size(self, *row):
-        c = Counter(row)
-        for value in c.values():
-            if value > self.max_group_size:
-                return False
-        return True
 
     def build_student_groups(self, row):
         student_groups = defaultdict(set)
@@ -89,4 +100,3 @@ class ConstraintsSolver:
                     return False
 
         return True
-

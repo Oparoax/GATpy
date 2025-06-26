@@ -15,5 +15,3 @@ def main():
     cs = ConstraintsSolver(student_list, 4, 8, course_count)
 
     print(cs.solve())
-
-
