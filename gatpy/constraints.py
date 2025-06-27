@@ -37,7 +37,7 @@ class ConstraintsSolver:
 
         # A student can only be attached to a single group
         for row in self._list:
-            problem.add_at_most_one(vars[(row.id, group)] for group in range(self.group_ids))
+            problem.add_exactly_one(vars[(row.id, group)] for group in range(self.group_ids))
 
         # A team can only be as big as the max group size
         for group in range(self.group_ids):
@@ -52,10 +52,11 @@ class ConstraintsSolver:
                 student_1_var = vars[(row.id, group)]
 
                 for avoidee in row.avoid_list:
-                    student_2_var = vars[(avoidee.id, group)]
+                    student_2_var = vars[(avoidee, group)]
 
-                    problem.add(not (student_1_var and student_2_var))
+                    problem.add(sum((student_1_var, student_2_var)) != 2)
 
+        # A team must be made of multiple specialisms
         student_specialism = defaultdict(list)
         for row in self._list:
             student_specialism[row.specialism].append(row.id)
@@ -69,13 +70,27 @@ class ConstraintsSolver:
 
                 problem.add(sum(spec_student_vars) <= self.max_size_per_course[specialism])
 
+                if self.max_size_per_course[specialism] > 1:
+                    problem.add(sum(spec_student_vars) >= 1)
+
         solver = cp_model.CpSolver()
 
         # Solve.
         status = solver.solve(problem)
-        print(status)
 
-        return status
+        teams = defaultdict(list)
+
+        if status in (cp_model.OPTIMAL, cp_model.FEASIBLE):
+            print("Solution found")
+
+            for st, var in vars.items():
+                if solver.value(var):
+                    student = st[0]
+                    team = st[1]
+
+                    teams[team].append(student)
+
+        return teams
 
     def build_student_groups(self, row):
         student_groups = defaultdict(set)
