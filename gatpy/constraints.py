@@ -1,7 +1,7 @@
 import math
 
 from ortools.sat.python import cp_model
-from collections import Counter, defaultdict
+from collections import defaultdict
 
 
 class ConstraintsSolver:

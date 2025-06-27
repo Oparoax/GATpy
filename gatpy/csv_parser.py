@@ -16,7 +16,6 @@ class CSVImport:
                 if data is not None:
                     student_list.append(data)
                     course_count[data.specialism] += 1
-                    print(data.id, data.name, data.specialism, str(data.avoid_list))
 
         return student_list, course_count
 

@@ -1,5 +1,6 @@
 from gatpy.csv_parser import CSVImport
 from gatpy.constraints import ConstraintsSolver
+from ortools.sat.python import cp_model
 
 import os
 
@@ -10,8 +11,8 @@ def main():
     csv_import = CSVImport()
     student_list, course_count = csv_import.import_csv(filepath)
 
-    print(course_count)
-
     cs = ConstraintsSolver(student_list, 4, 8, course_count)
 
-    print(cs.solve())
+    result = cs.solve()
+
+    print(result)
