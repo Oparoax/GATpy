@@ -46,6 +46,7 @@ class ConstraintsSolver:
                 group_vars.append(vars[(row.id, group)])
             problem.add(sum(group_vars) <= self.max_group_size)
 
+        # A team cannot consist of team members who have avoided each other
         for group in range(self.group_ids):
             for row in self._list:
                 student_1_var = vars[(row.id, group)]
@@ -55,8 +56,18 @@ class ConstraintsSolver:
 
                     problem.add(not (student_1_var and student_2_var))
 
+        student_specialism = defaultdict(list)
+        for row in self._list:
+            student_specialism[row.specialism].append(row.id)
 
-        #problem.add(self.limit_group_makeup)
+        for group in range(self.group_ids):
+
+            for (specialism,students) in student_specialism.items():
+                spec_student_vars = []
+                for student in students:
+                    spec_student_vars.append(vars[(student, group)])
+
+                problem.add(sum(spec_student_vars) <= self.max_size_per_course[specialism])
 
         solver = cp_model.CpSolver()
 
@@ -73,30 +84,3 @@ class ConstraintsSolver:
             student_groups[group_id].add(student.id)
 
         return student_groups
-
-    def apply_avoid(self, *row):
-        student_groups = self.build_student_groups(row)
-
-        for group_id, members in student_groups.items():
-            for student in members:
-                curr_student = self.student_index[student]
-                if curr_student.avoid_list.intersection(members):
-                    return False
-        return True
-
-    def limit_group_makeup(self, *row):
-        student_groups = self.build_student_groups(row)
-
-        for group_id, members in student_groups.items():
-            group_makeup = defaultdict(int)
-
-            for student in members:
-                curr_student = self.student_index[student]
-                group_makeup[curr_student.specialism] += 1
-
-            for course, max_size in self.max_size_per_course.items():
-                if max_size < group_makeup[course]:
-                    print("sadness mode", max_size, group_makeup[course])
-                    return False
-
-        return True
