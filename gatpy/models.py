@@ -16,5 +16,6 @@ class Student:
         self.avoid_list = set(no_list)
 
 class Team:
-    def __init__(self, student_list):
+    def __init__(self, team_id, student_list):
+        self.team_id = team_id
         self.student_list = student_list

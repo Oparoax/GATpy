@@ -5,7 +5,7 @@ from gatpy.models import Student, SPECIALISM
 
 class CSVImport:
     def import_csv(self, filepath):
-        student_list = []
+        student_list = dict()
         course_count = defaultdict(int)
 
         with open(filepath) as csvfile:
@@ -14,7 +14,7 @@ class CSVImport:
                 data  = self.parse_row(row)
 
                 if data is not None:
-                    student_list.append(data)
+                    student_list[data.id] = data
                     course_count[data.specialism] += 1
 
         return student_list, course_count
@@ -53,3 +53,33 @@ class CSVImport:
             return None
 
         return specialism
+
+class CSVExport:
+    def export_csv(self, teams, student_list, filepath):
+        fields = ['team_id','id', 'name', 'specialism', 'avoid_list']
+        _format = self.match_student_objects(teams, student_list)
+
+        with open(filepath, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(fields)
+
+            for _id, students in _format.items():
+                for student in students:
+                    if not student.avoid_list:
+                        writer.writerow([_id, student.id, student.name, student.specialism.name, " "])
+                    else:
+                        writer.writerow([_id, student.id, student.name, student.specialism.name, student.avoid_list])
+
+
+    def match_student_objects(self, teams, student_list):
+        _format = defaultdict(list)
+
+        for _id, students in teams.items():
+            for student in students:
+                try:
+                    student = student_list[student]
+                    _format[_id].append(student)
+                except KeyError:
+                    print("Student id not found in list for " + student.name)
+
+        return _format
